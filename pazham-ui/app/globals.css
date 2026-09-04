@@ -1,0 +1,488 @@
+@import "tailwindcss";
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #f7d84a;
+  color: #241a00;
+  font-family: "Courier New", monospace;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+/* =========================================================
+   LANDING PAGE
+========================================================= */
+
+.pazham {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 70px 20px;
+  background-color: #f7d84a;
+  background-image: radial-gradient(
+    #241a00 0.7px,
+    transparent 0.7px
+  );
+  background-size: 7px 7px;
+}
+
+/* LOGO */
+
+.logo {
+  margin: 0;
+  padding: 8px 18px;
+  background: #fff4a8;
+  border: 3px solid #241a00;
+  font-family: "Courier New", monospace;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  box-shadow: 6px 6px 0 #241a00;
+}
+
+/* MAIN HEADING */
+
+.pazham h2 {
+  margin: 90px 0 45px;
+  max-width: 900px;
+  padding: 10px;
+  text-align: center;
+  font-family: "Courier New", monospace;
+  font-size: clamp(38px, 7vw, 78px);
+  line-height: 0.95;
+  letter-spacing: -4px;
+  font-weight: 900;
+}
+
+/* UPLOAD */
+
+.upload-box {
+  width: min(600px, 90vw);
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff4a8;
+  border: 4px dashed #241a00;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.upload-box:hover {
+  background: #e8c936;
+  box-shadow: 8px 8px 0 #241a00;
+  transform: translate(-2px, -2px);
+}
+
+.upload-box input {
+  display: none;
+}
+
+.upload-box span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #241a00;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+/* =========================================================
+   PROCESSING PAGE
+========================================================= */
+
+.processing-page {
+  min-height: 100vh;
+  padding: 28px 40px 60px;
+  background-color: #f7d84a;
+  background-image: radial-gradient(
+    #241a00 0.65px,
+    transparent 0.65px
+  );
+  background-size: 7px 7px;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+
+.processing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mini-logo {
+  padding: 7px 13px;
+  background: #fff4a8;
+  border: 3px solid #241a00;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  box-shadow: 4px 4px 0 #241a00;
+}
+
+.analysis-number {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  opacity: 0.65;
+}
+
+/* CONTENT */
+
+.processing-content {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* TITLE */
+
+.processing-title {
+  margin: 55px 0 35px;
+  font-size: clamp(42px, 7vw, 82px);
+  line-height: 0.9;
+  letter-spacing: -5px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   VISUAL AREA
+========================================================= */
+
+.visual-area {
+  position: relative;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 35px;
+  overflow: visible;
+}
+
+.banana-panel {
+  position: relative;
+  width: min(500px, 42vw);
+  max-width: 500px;
+  aspect-ratio: 1 / 1;
+  flex: 0 1 500px;
+  min-width: 0;
+  background: #fff4a8;
+  border: 4px solid #241a00;
+  box-shadow: 12px 12px 0 #241a00;
+  overflow: hidden;
+  transform-origin: center center;
+}
+
+/* ACTUAL UPLOADED IMAGE */
+
+.uploaded-banana {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* SVG OVERLAY */
+
+.banana-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* BANANA OUTLINE */
+
+.banana-outline {
+  stroke: #426b20;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(
+    0 0 5px rgba(66, 107, 32, 0.45)
+  );
+}
+
+/* CENTRELINE */
+
+.centre-line {
+  stroke: #241a00;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 8 7;
+  filter: drop-shadow(
+    0 0 4px rgba(36, 26, 0, 0.35)
+  );
+}
+
+/* CENTRELINE POINTS */
+
+.math-point {
+  fill: #241a00;
+  filter: drop-shadow(
+    0 0 4px rgba(36, 26, 0, 0.6)
+  );
+}
+
+/* MAX CURVATURE */
+
+.curvature-point {
+  fill: #d83b20;
+  stroke: #fff4a8;
+  stroke-width: 4;
+  filter: drop-shadow(
+    0 0 8px rgba(216, 59, 32, 0.65)
+  );
+}
+
+/* =========================================================
+   GRAPH
+========================================================= */
+
+.graph-panel {
+  width: min(600px, 48vw);
+  max-width: 600px;
+  flex: 0 1 600px;
+  min-width: 0;
+  padding: 18px;
+  background: #fff4a8;
+  border: 4px solid #241a00;
+  box-shadow: 12px 12px 0 #241a00;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-area {
+  width: min(850px, 90vw);
+  margin: 35px auto 0;
+}
+
+.status-text {
+  min-height: 25px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+/* PROGRESS */
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  margin-top: 12px;
+  background: #fff4a8;
+  border: 2px solid #241a00;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #426b20;
+}
+
+/* =========================================================
+   EQUATION
+========================================================= */
+
+.equation-container {
+  width: min(950px, 90vw);
+  margin: 45px auto 0;
+  padding: 25px;
+  background: #fff4a8;
+  border: 4px solid #241a00;
+  box-shadow: 8px 8px 0 #241a00;
+}
+
+.equation-label {
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  opacity: 0.7;
+}
+
+.equation {
+  font-family: "Courier New", monospace;
+  font-size: clamp(18px, 3vw, 32px);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   CURVATURE RESULT
+========================================================= */
+
+.curvature-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+  padding: 12px 18px;
+  background: #241a00;
+  color: #fff4a8;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.curvature-result strong {
+  font-size: 16px;
+  color: #f7d84a;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.results-button {
+  margin-top: 30px;
+  padding: 14px 24px;
+  background: #426b20;
+  color: #fff4a8;
+  border: 3px solid #241a00;
+  box-shadow: 6px 6px 0 #241a00;
+  cursor: pointer;
+  font-weight: 900;
+  letter-spacing: 2px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.results-button:hover {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #241a00;
+}
+
+.results-button:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  padding: 20px 30px;
+  background: #fff4a8;
+  border: 4px solid #241a00;
+  box-shadow: 8px 8px 0 #241a00;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+  .processing-page {
+    padding: 20px;
+  }
+
+  .visual-area {
+    flex-direction: column;
+    min-height: auto;
+    gap: 35px;
+  }
+
+  .banana-panel {
+    width: min(600px, 90vw);
+    transform: none;
+  }
+
+  .graph-panel {
+    width: min(650px, 90vw);
+  }
+
+  .processing-title {
+    margin-top: 45px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pazham {
+    padding-top: 45px;
+  }
+
+  .logo {
+    font-size: 24px;
+    letter-spacing: 5px;
+  }
+
+  .pazham h2 {
+    margin-top: 70px;
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+
+  .upload-box {
+    height: 180px;
+  }
+
+  .processing-title {
+    font-size: 46px;
+    letter-spacing: -3px;
+  }
+
+  .mini-logo {
+    font-size: 14px;
+    letter-spacing: 3px;
+  }
+
+  .analysis-number {
+    font-size: 10px;
+  }
+
+  .banana-panel,
+  .graph-panel {
+    box-shadow: 7px 7px 0 #241a00;
+  }
+
+  .equation-container {
+    padding: 18px;
+  }
+}
