@@ -1670,6 +1670,30 @@ def analyze():
                 "error": "Could not decode uploaded image."
             }), 400
 
+        # Resize very large images before expensive analysis
+        MAX_DIM = 1200
+
+        height, width = img.shape[:2]
+        largest_dim = max(height, width)
+
+        if largest_dim > MAX_DIM:
+            scale = MAX_DIM / largest_dim
+
+            new_width = int(width * scale)
+            new_height = int(height * scale)
+
+            img = cv2.resize(
+                img,
+                (new_width, new_height),
+                interpolation=cv2.INTER_AREA
+            )
+
+            print(
+                f"Resized image: "
+                f"{width}x{height} -> "
+                f"{new_width}x{new_height}"
+            )
+
         print(
             "Decoded image:",
             image.shape
