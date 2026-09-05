@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
+import os
 import cv2
 import numpy as np
 import math
@@ -1735,8 +1735,8 @@ if __name__ == "__main__":
         "=============================================="
     )
 
-    app.run(
-        host="0.0.0.0",
-        port=5001,
-        debug=True
-    )
+app.run(
+    host="0.0.0.0",
+    port=int(os.environ.get("PORT", 5001)),
+    debug=True
+)
