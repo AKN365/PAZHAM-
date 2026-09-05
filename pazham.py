@@ -53,7 +53,11 @@ def smooth_values(values, window=15):
     """
     Moving-average smoothing that preserves array length.
     """
-    values = np.asarray(values, dtype=float)
+
+    values = np.asarray(
+        values,
+        dtype=float
+    )
 
     if len(values) < 5:
         return values.copy()
@@ -69,7 +73,13 @@ def smooth_values(values, window=15):
     if window % 2 == 0:
         window -= 1
 
-    kernel = np.ones(window, dtype=float) / window
+    kernel = (
+        np.ones(
+            window,
+            dtype=float
+        )
+        / window
+    )
 
     pad = window // 2
 
@@ -88,11 +98,18 @@ def smooth_values(values, window=15):
     return smoothed
 
 
-def remove_duplicate_points(points, min_distance=1.0):
+def remove_duplicate_points(
+    points,
+    min_distance=1.0
+):
     """
     Remove points that are extremely close together.
     """
-    points = np.asarray(points, dtype=float)
+
+    points = np.asarray(
+        points,
+        dtype=float
+    )
 
     if len(points) == 0:
         return points
@@ -100,12 +117,18 @@ def remove_duplicate_points(points, min_distance=1.0):
     output = [points[0]]
 
     for point in points[1:]:
-        distance = np.linalg.norm(point - output[-1])
+
+        distance = np.linalg.norm(
+            point - output[-1]
+        )
 
         if distance >= min_distance:
             output.append(point)
 
-    return np.asarray(output, dtype=float)
+    return np.asarray(
+        output,
+        dtype=float
+    )
 
 
 # ============================================================
@@ -114,11 +137,19 @@ def remove_duplicate_points(points, min_distance=1.0):
 
 def segment_banana(image):
     """
-    Segment banana using HSV thresholding and morphological cleanup.
-    Returns a clean binary mask and largest contour.
+    Segment banana using HSV thresholding and morphological
+    cleanup.
+
+    Returns:
+        clean binary mask
+        largest contour
+        contour area
     """
 
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2HSV
+    )
 
     mask = cv2.inRange(
         hsv,
@@ -126,7 +157,10 @@ def segment_banana(image):
         HSV_UPPER
     )
 
+    # --------------------------------------------------------
     # Remove small isolated noise
+    # --------------------------------------------------------
+
     open_kernel = cv2.getStructuringElement(
         cv2.MORPH_ELLIPSE,
         (5, 5)
@@ -138,7 +172,10 @@ def segment_banana(image):
         open_kernel
     )
 
+    # --------------------------------------------------------
     # Close small holes/gaps inside banana
+    # --------------------------------------------------------
+
     close_kernel = cv2.getStructuringElement(
         cv2.MORPH_ELLIPSE,
         (11, 11)
@@ -157,6 +194,7 @@ def segment_banana(image):
     )
 
     if not contours:
+
         raise ValueError(
             "No banana contour was detected."
         )
@@ -166,14 +204,19 @@ def segment_banana(image):
         key=cv2.contourArea
     )
 
-    area = cv2.contourArea(contour)
+    area = cv2.contourArea(
+        contour
+    )
 
     if area < MIN_BANANA_AREA:
+
         raise ValueError(
             "Detected object is too small to be a banana."
         )
 
-    clean_mask = np.zeros_like(mask)
+    clean_mask = np.zeros_like(
+        mask
+    )
 
     cv2.drawContours(
         clean_mask,
@@ -183,7 +226,11 @@ def segment_banana(image):
         thickness=cv2.FILLED
     )
 
-    return clean_mask, contour, float(area)
+    return (
+        clean_mask,
+        contour,
+        float(area)
+    )
 
 
 # ============================================================
@@ -195,13 +242,20 @@ def calculate_pca_axes(points):
     Calculate principal direction and perpendicular direction.
 
     Coordinates are standard image coordinates:
+
         x -> right
         y -> down
     """
 
-    points = np.asarray(points, dtype=float)
+    points = np.asarray(
+        points,
+        dtype=float
+    )
 
-    mean = np.mean(points, axis=0)
+    mean = np.mean(
+        points,
+        axis=0
+    )
 
     centered = points - mean
 
@@ -213,31 +267,54 @@ def calculate_pca_axes(points):
         covariance
     )
 
-    order = np.argsort(eigenvalues)[::-1]
+    order = np.argsort(
+        eigenvalues
+    )[::-1]
 
-    direction = eigenvectors[:, order[0]]
+    direction = eigenvectors[
+        :,
+        order[0]
+    ]
 
     # Make direction deterministic
     if direction[0] < 0:
         direction = -direction
 
     perpendicular = np.array(
-        [-direction[1], direction[0]],
+        [
+            -direction[1],
+            direction[0]
+        ],
         dtype=float
     )
 
     perpendicular /= (
-        np.linalg.norm(perpendicular) + 1e-12
+        np.linalg.norm(
+            perpendicular
+        )
+        + 1e-12
     )
 
     direction /= (
-        np.linalg.norm(direction) + 1e-12
+        np.linalg.norm(
+            direction
+        )
+        + 1e-12
     )
 
-    return mean, direction, perpendicular
+    return (
+        mean,
+        direction,
+        perpendicular
+    )
 
 
-def project_points(points, origin, direction, perpendicular):
+def project_points(
+    points,
+    origin,
+    direction,
+    perpendicular
+):
     """
     Convert image coordinates into PCA coordinates.
 
@@ -245,14 +322,22 @@ def project_points(points, origin, direction, perpendicular):
     v = transverse direction
     """
 
-    points = np.asarray(points, dtype=float)
+    points = np.asarray(
+        points,
+        dtype=float
+    )
 
     relative = points - origin
 
     u = relative @ direction
     v = relative @ perpendicular
 
-    return np.column_stack((u, v))
+    return np.column_stack(
+        (
+            u,
+            v
+        )
+    )
 
 
 def unproject_points(
@@ -272,8 +357,14 @@ def unproject_points(
 
     return (
         origin
-        + np.outer(uv_points[:, 0], direction)
-        + np.outer(uv_points[:, 1], perpendicular)
+        + np.outer(
+            uv_points[:, 0],
+            direction
+        )
+        + np.outer(
+            uv_points[:, 1],
+            perpendicular
+        )
     )
 
 
@@ -281,7 +372,10 @@ def unproject_points(
 # FOREGROUND RUN DETECTION
 # ============================================================
 
-def find_contiguous_runs(values, gap=1.5):
+def find_contiguous_runs(
+    values,
+    gap=1.5
+):
     """
     Given transverse coordinates belonging to one longitudinal
     column, split them into contiguous foreground runs.
@@ -299,7 +393,10 @@ def find_contiguous_runs(values, gap=1.5):
         return []
 
     values = np.sort(
-        np.asarray(values, dtype=float)
+        np.asarray(
+            values,
+            dtype=float
+        )
     )
 
     runs = []
@@ -310,8 +407,12 @@ def find_contiguous_runs(values, gap=1.5):
     for value in values[1:]:
 
         if value - previous > gap:
+
             runs.append(
-                (start, previous)
+                (
+                    start,
+                    previous
+                )
             )
 
             start = value
@@ -319,7 +420,10 @@ def find_contiguous_runs(values, gap=1.5):
         previous = value
 
     runs.append(
-        (start, previous)
+        (
+            start,
+            previous
+        )
     )
 
     return runs
@@ -344,7 +448,8 @@ def extract_robust_centreline(
     3. Scan longitudinally through the banana.
     4. For each column, find contiguous foreground regions.
     5. Track the most plausible region continuously.
-    6. Use the midpoint of the selected region as the centreline.
+    6. Use the midpoint of the selected region as the
+       centreline.
     7. Smooth and resample by arc length.
 
     This avoids the old "average everything in a row" problem.
@@ -354,9 +459,12 @@ def extract_robust_centreline(
     # Banana pixels
     # --------------------------------------------------------
 
-    ys, xs = np.where(mask > 0)
+    ys, xs = np.where(
+        mask > 0
+    )
 
     if len(xs) < 100:
+
         raise ValueError(
             "Not enough banana pixels for centreline extraction."
         )
@@ -372,7 +480,11 @@ def extract_robust_centreline(
     # PCA coordinate system
     # --------------------------------------------------------
 
-    origin, direction, perpendicular = calculate_pca_axes(
+    (
+        origin,
+        direction,
+        perpendicular
+    ) = calculate_pca_axes(
         pixels
     )
 
@@ -386,12 +498,18 @@ def extract_robust_centreline(
     u_values = uv[:, 0]
     v_values = uv[:, 1]
 
-    u_min = float(np.min(u_values))
-    u_max = float(np.max(u_values))
+    u_min = float(
+        np.min(u_values)
+    )
+
+    u_max = float(
+        np.max(u_values)
+    )
 
     length = u_max - u_min
 
     if length < 20:
+
         raise ValueError(
             "Banana is too small or too compressed for centreline extraction."
         )
@@ -400,7 +518,6 @@ def extract_robust_centreline(
     # Longitudinal bins
     # --------------------------------------------------------
 
-    # Use approximately one-pixel bins where possible.
     number_of_columns = int(
         max(
             80,
@@ -429,10 +546,17 @@ def extract_robust_centreline(
 
     candidates = []
 
-    for i, center_u in enumerate(bins):
+    for center_u in bins:
 
-        lower = center_u - bin_width * 0.8
-        upper = center_u + bin_width * 0.8
+        lower = (
+            center_u
+            - bin_width * 0.8
+        )
+
+        upper = (
+            center_u
+            + bin_width * 0.8
+        )
 
         selection = (
             (u_values >= lower)
@@ -440,9 +564,12 @@ def extract_robust_centreline(
             (u_values <= upper)
         )
 
-        transverse = v_values[selection]
+        transverse = v_values[
+            selection
+        ]
 
         if len(transverse) < 3:
+
             candidates.append([])
 
             continue
@@ -456,14 +583,18 @@ def extract_robust_centreline(
 
         for run_start, run_end in runs:
 
-            width = run_end - run_start
+            width = (
+                run_end
+                - run_start
+            )
 
             # Ignore tiny isolated noise fragments
             if width < 2.0:
                 continue
 
             center_v = (
-                run_start + run_end
+                run_start
+                + run_end
             ) / 2.0
 
             column_candidates.append(
@@ -481,14 +612,14 @@ def extract_robust_centreline(
         )
 
     # --------------------------------------------------------
-    # Track the centreline through the candidate regions
+    # Track the centreline through candidate regions
     # --------------------------------------------------------
 
     tracked = []
 
     previous_v = None
 
-    for i, column in enumerate(candidates):
+    for column in candidates:
 
         if not column:
             continue
@@ -499,7 +630,6 @@ def extract_robust_centreline(
 
         if previous_v is None:
 
-            # Prefer the widest real banana region.
             selected = max(
                 column,
                 key=lambda item: item["width"]
@@ -511,21 +641,28 @@ def extract_robust_centreline(
             # Choose candidate closest to previous centre.
             #
             # A very wide candidate is still preferred,
-            # but continuity is much more important.
+            # but continuity is more important.
             # ------------------------------------------------
 
             def candidate_cost(item):
 
                 distance = abs(
-                    item["v"] - previous_v
+                    item["v"]
+                    - previous_v
                 )
 
-                width_bonus = min(
-                    item["width"],
-                    30.0
-                ) * 0.08
+                width_bonus = (
+                    min(
+                        item["width"],
+                        30.0
+                    )
+                    * 0.08
+                )
 
-                return distance - width_bonus
+                return (
+                    distance
+                    - width_bonus
+                )
 
             selected = min(
                 column,
@@ -542,6 +679,7 @@ def extract_robust_centreline(
         previous_v = selected["v"]
 
     if len(tracked) < 20:
+
         raise ValueError(
             "Could not track a continuous banana centreline."
         )
@@ -552,15 +690,19 @@ def extract_robust_centreline(
     )
 
     # --------------------------------------------------------
-    # Fill obvious longitudinal gaps
+    # Sort by longitudinal coordinate
     # --------------------------------------------------------
 
-    # Sort by longitudinal coordinate.
     tracked = tracked[
-        np.argsort(tracked[:, 0])
+        np.argsort(
+            tracked[:, 0]
+        )
     ]
 
-    # Remove duplicate longitudinal coordinates.
+    # --------------------------------------------------------
+    # Remove duplicate longitudinal coordinates
+    # --------------------------------------------------------
+
     unique_u, unique_indices = np.unique(
         tracked[:, 0],
         return_index=True
@@ -571,16 +713,16 @@ def extract_robust_centreline(
     ]
 
     if len(tracked) < 10:
+
         raise ValueError(
             "Centreline contains too few unique points."
         )
 
     # --------------------------------------------------------
-    # Smooth transverse movement.
+    # Smooth transverse movement
     #
-    # Important:
     # We smooth v against u, not x/y independently.
-    # This preserves the banana's geometry much better.
+    # This preserves banana geometry better.
     # --------------------------------------------------------
 
     u = tracked[:, 0]
@@ -629,6 +771,7 @@ def extract_robust_centreline(
     )
 
     if len(centreline) < 10:
+
         raise ValueError(
             "Centreline collapsed after smoothing."
         )
@@ -668,7 +811,10 @@ def extract_robust_centreline(
 # ARC LENGTH RESAMPLING
 # ============================================================
 
-def resample_by_arclength(points, count=300):
+def resample_by_arclength(
+    points,
+    count=300
+):
     """
     Resample points uniformly by travelled distance.
     """
@@ -746,6 +892,7 @@ def resample_by_arclength(points, count=300):
 # ============================================================
 
 def calculate_curve_length(points):
+
     points = np.asarray(
         points,
         dtype=float
@@ -775,7 +922,9 @@ def calculate_curve_length(points):
 # DIRECT CURVATURE
 # ============================================================
 
-def calculate_direct_curvature(centreline):
+def calculate_direct_curvature(
+    centreline
+):
     """
     Calculate curvature directly from the extracted centreline.
 
@@ -795,6 +944,7 @@ def calculate_direct_curvature(centreline):
     )
 
     if len(points) < 7:
+
         return np.zeros(
             len(points),
             dtype=float
@@ -810,7 +960,8 @@ def calculate_direct_curvature(centreline):
     ddy = np.gradient(dy)
 
     numerator = np.abs(
-        dx * ddy - dy * ddx
+        dx * ddy
+        - dy * ddx
     )
 
     denominator = (
@@ -821,7 +972,9 @@ def calculate_direct_curvature(centreline):
     curvature = np.divide(
         numerator,
         denominator,
-        out=np.zeros_like(numerator),
+        out=np.zeros_like(
+            numerator
+        ),
         where=denominator > 1e-12
     )
 
@@ -832,8 +985,8 @@ def calculate_direct_curvature(centreline):
         neginf=0.0
     )
 
-    # Smooth curvature slightly so pixel-level noise doesn't
-    # produce ridiculous spikes.
+    # Smooth curvature slightly so pixel-level noise
+    # doesn't produce ridiculous spikes.
     curvature = smooth_values(
         curvature,
         9
@@ -846,6 +999,7 @@ def calculate_direct_curvature(centreline):
     )
 
     if edge > 0:
+
         curvature[:edge] = np.nan
         curvature[-edge:] = np.nan
 
@@ -854,10 +1008,15 @@ def calculate_direct_curvature(centreline):
     )
 
     if not np.any(finite):
+
         max_curvature = 0.0
+
     else:
+
         max_curvature = float(
-            np.nanmax(curvature)
+            np.nanmax(
+                curvature
+            )
         )
 
     curvature = np.nan_to_num(
@@ -874,7 +1033,9 @@ def calculate_direct_curvature(centreline):
 # TANGENT / TOTAL TURNING
 # ============================================================
 
-def calculate_total_turning(centreline):
+def calculate_total_turning(
+    centreline
+):
     """
     Calculate total absolute change in tangent angle.
     """
@@ -918,6 +1079,7 @@ def calculate_total_turning(centreline):
     )
 
     if edge > 0:
+
         changes = changes[
             edge:-edge
         ]
@@ -933,7 +1095,9 @@ def calculate_total_turning(centreline):
 # SCORE
 # ============================================================
 
-def calculate_score(total_turning_degrees):
+def calculate_score(
+    total_turning_degrees
+):
     """
     Convert total tangent turning into a 0-100 banana score.
 
@@ -951,7 +1115,9 @@ def calculate_score(total_turning_degrees):
 
     degrees = max(
         0.0,
-        float(total_turning_degrees)
+        float(
+            total_turning_degrees
+        )
     )
 
     score = (
@@ -979,7 +1145,9 @@ def calculate_score(total_turning_degrees):
 # POLYNOMIAL FIT
 # ============================================================
 
-def fit_polynomial(centreline):
+def fit_polynomial(
+    centreline
+):
     """
     Fit a polynomial while automatically choosing the better
     axis.
@@ -1024,24 +1192,29 @@ def fit_polynomial(centreline):
         dependent = x
 
     center = float(
-        np.mean(independent)
+        np.mean(
+            independent
+        )
     )
 
     scale = float(
         np.max(
             np.abs(
-                independent - center
+                independent
+                - center
             )
         )
     )
 
     if scale < 1e-8:
+
         raise ValueError(
             "Polynomial scale is too small."
         )
 
     normalized = (
-        independent - center
+        independent
+        - center
     ) / scale
 
     degree = min(
@@ -1077,10 +1250,16 @@ def evaluate_polynomial(
     independent_max=None
 ):
     if independent_min is None:
-        independent_min = center - scale
+
+        independent_min = (
+            center - scale
+        )
 
     if independent_max is None:
-        independent_max = center + scale
+
+        independent_max = (
+            center + scale
+        )
 
     independent = np.linspace(
         independent_min,
@@ -1120,10 +1299,15 @@ def evaluate_polynomial(
 # ============================================================
 
 def format_number(value):
+
     if abs(value) < 1e-10:
         value = 0.0
 
-    return f"{value:.6f}".rstrip("0").rstrip(".")
+    return (
+        f"{value:.6f}"
+        .rstrip("0")
+        .rstrip(".")
+    )
 
 
 def polynomial_equation(
@@ -1135,15 +1319,16 @@ def polynomial_equation(
     """
     Create a readable polynomial equation.
 
-    Note:
-    The polynomial internally uses the normalized variable:
+    The polynomial internally uses:
 
         u = (independent - center) / scale
     """
 
     terms = []
 
-    degree = len(coefficients) - 1
+    degree = len(
+        coefficients
+    ) - 1
 
     for index, coefficient in enumerate(
         coefficients
@@ -1154,7 +1339,11 @@ def polynomial_equation(
         if abs(coefficient) < 1e-10:
             continue
 
-        sign = "+" if coefficient >= 0 else "-"
+        sign = (
+            "+"
+            if coefficient >= 0
+            else "-"
+        )
 
         magnitude = abs(
             coefficient
@@ -1170,25 +1359,43 @@ def polynomial_equation(
 
         elif power == 1:
 
-            if abs(magnitude - 1.0) < 1e-10:
+            if abs(
+                magnitude - 1.0
+            ) < 1e-10:
+
                 term = "u"
+
             else:
-                term = f"{coefficient_text}u"
+
+                term = (
+                    f"{coefficient_text}u"
+                )
 
         else:
 
-            if abs(magnitude - 1.0) < 1e-10:
+            if abs(
+                magnitude - 1.0
+            ) < 1e-10:
+
                 term = f"u^{power}"
+
             else:
-                term = f"{coefficient_text}u^{power}"
+
+                term = (
+                    f"{coefficient_text}"
+                    f"u^{power}"
+                )
 
         if not terms:
 
             if coefficient < 0:
+
                 terms.append(
                     "- " + term
                 )
+
             else:
+
                 terms.append(
                     term
                 )
@@ -1200,20 +1407,27 @@ def polynomial_equation(
             )
 
     if not terms:
+
         expression = "0"
+
     else:
+
         expression = "".join(
             terms
         )
 
     if axis == "x":
+
         lhs = "y"
+
     else:
+
         lhs = "x"
 
     return (
         f"{lhs} = {expression}, "
-        f"where u = ({axis} - {format_number(center)})"
+        f"where u = ({axis} - "
+        f"{format_number(center)})"
         f" / {format_number(scale)}"
     )
 
@@ -1236,6 +1450,7 @@ def simplify_contour(
     ).astype(float)
 
     if len(contour_points) <= max_points:
+
         return contour_points
 
     indices = np.linspace(
@@ -1253,7 +1468,9 @@ def simplify_contour(
 # JSON POINT CONVERSION
 # ============================================================
 
-def points_to_json(points):
+def points_to_json(
+    points
+):
     points = np.asarray(
         points,
         dtype=float
@@ -1261,8 +1478,14 @@ def points_to_json(points):
 
     return [
         [
-            round(float(point[0]), 2),
-            round(float(point[1]), 2)
+            round(
+                float(point[0]),
+                2
+            ),
+            round(
+                float(point[1]),
+                2
+            )
         ]
         for point in points
     ]
@@ -1272,14 +1495,20 @@ def points_to_json(points):
 # MAIN ANALYSIS
 # ============================================================
 
-def analyze_image(image):
+def analyze_image(
+    image
+):
     height, width = image.shape[:2]
 
     # --------------------------------------------------------
     # Segment
     # --------------------------------------------------------
 
-    mask, contour, banana_area = segment_banana(
+    (
+        mask,
+        contour,
+        banana_area
+    ) = segment_banana(
         image
     )
 
@@ -1294,6 +1523,7 @@ def analyze_image(image):
     )
 
     if len(centreline) < 10:
+
         raise ValueError(
             "Centreline extraction failed."
         )
@@ -1317,18 +1547,26 @@ def analyze_image(image):
 
     if polynomial_axis == "x":
 
-        independent_values = centreline[:, 0]
+        independent_values = (
+            centreline[:, 0]
+        )
 
     else:
 
-        independent_values = centreline[:, 1]
+        independent_values = (
+            centreline[:, 1]
+        )
 
     independent_min = float(
-        np.min(independent_values)
+        np.min(
+            independent_values
+        )
     )
 
     independent_max = float(
-        np.max(independent_values)
+        np.max(
+            independent_values
+        )
     )
 
     polynomial_points = evaluate_polynomial(
@@ -1350,12 +1588,16 @@ def analyze_image(image):
     )
 
     if len(curvature) == 0:
+
         max_curvature = 0.0
         max_curvature_index = 0
+
     else:
 
         max_curvature_index = int(
-            np.argmax(curvature)
+            np.argmax(
+                curvature
+            )
         )
 
         max_curvature = float(
@@ -1376,9 +1618,11 @@ def analyze_image(image):
 
     if len(centreline) > 0:
 
-        max_curvature_point = centreline[
-            max_curvature_index
-        ]
+        max_curvature_point = (
+            centreline[
+                max_curvature_index
+            ]
+        )
 
     else:
 
@@ -1402,10 +1646,8 @@ def analyze_image(image):
         centreline
     )
 
-    total_turning_degrees = (
-        math.degrees(
-            total_turning
-        )
+    total_turning_degrees = math.degrees(
+        total_turning
     )
 
     # --------------------------------------------------------
@@ -1484,7 +1726,9 @@ def analyze_image(image):
             len(coefficients) - 1
         ),
 
-        "polynomialAxis": polynomial_axis,
+        "polynomialAxis": (
+            polynomial_axis
+        ),
 
         "polynomialCenter": round(
             polynomial_center,
@@ -1500,7 +1744,10 @@ def analyze_image(image):
 
         # Curvature
         "curvature": [
-            round(float(value), 8)
+            round(
+                float(value),
+                8
+            )
             for value in curvature
         ],
 
@@ -1516,11 +1763,15 @@ def analyze_image(image):
 
         "maxCurvaturePoint": [
             round(
-                float(max_curvature_point[0]),
+                float(
+                    max_curvature_point[0]
+                ),
                 2
             ),
             round(
-                float(max_curvature_point[1]),
+                float(
+                    max_curvature_point[1]
+                ),
                 2
             )
         ],
@@ -1542,7 +1793,9 @@ def analyze_image(image):
         "debug": {
 
             "bananaPixels": int(
-                np.count_nonzero(mask)
+                np.count_nonzero(
+                    mask
+                )
             ),
 
             "contourArea": round(
@@ -1587,7 +1840,6 @@ def analyze_image(image):
 # FLASK API
 # ============================================================
 
-
 @app.route(
     "/analyze",
     methods=["POST"]
@@ -1596,12 +1848,38 @@ def analyze():
 
     try:
 
-        print("\n========== PAZHAM REQUEST ==========")
-        print("Method:", request.method)
-        print("Content-Type:", request.content_type)
-        print("Content-Length:", request.content_length)
-        print("Request files:", list(request.files.keys()))
-        print("Request form:", list(request.form.keys()))
+        print(
+            "\n========== PAZHAM REQUEST =========="
+        )
+
+        print(
+            "Method:",
+            request.method
+        )
+
+        print(
+            "Content-Type:",
+            request.content_type
+        )
+
+        print(
+            "Content-Length:",
+            request.content_length
+        )
+
+        print(
+            "Request files:",
+            list(
+                request.files.keys()
+            )
+        )
+
+        print(
+            "Request form:",
+            list(
+                request.form.keys()
+            )
+        )
 
         # ----------------------------------------------------
         # Check uploaded image
@@ -1609,17 +1887,31 @@ def analyze():
 
         if "image" not in request.files:
 
-            print("ERROR: No 'image' field in request.files")
-            print("====================================\n")
+            print(
+                "ERROR: No 'image' field "
+                "in request.files"
+            )
+
+            print(
+                "====================================\n"
+            )
 
             return jsonify({
                 "error": "No image uploaded.",
-                "receivedFiles": list(request.files.keys()),
-                "receivedForm": list(request.form.keys()),
-                "contentType": request.content_type
+                "receivedFiles": list(
+                    request.files.keys()
+                ),
+                "receivedForm": list(
+                    request.form.keys()
+                ),
+                "contentType": (
+                    request.content_type
+                )
             }), 400
 
-        uploaded_file = request.files["image"]
+        uploaded_file = request.files[
+            "image"
+        ]
 
         print(
             "Received filename:",
@@ -1640,11 +1932,18 @@ def analyze():
 
         if not file_bytes:
 
-            print("ERROR: Uploaded image is empty.")
-            print("====================================\n")
+            print(
+                "ERROR: Uploaded image is empty."
+            )
+
+            print(
+                "====================================\n"
+            )
 
             return jsonify({
-                "error": "Uploaded image is empty."
+                "error": (
+                    "Uploaded image is empty."
+                )
             }), 400
 
         # ----------------------------------------------------
@@ -1663,77 +1962,143 @@ def analyze():
 
         if image is None:
 
-            print("ERROR: OpenCV could not decode image.")
-            print("====================================\n")
-
-            return jsonify({
-                "error": "Could not decode uploaded image."
-            }), 400
-
-        # Resize very large images before expensive analysis
-        MAX_DIM = 1200
-
-        height, width = img.shape[:2]
-        largest_dim = max(height, width)
-
-        if largest_dim > MAX_DIM:
-            scale = MAX_DIM / largest_dim
-
-            new_width = int(width * scale)
-            new_height = int(height * scale)
-
-            img = cv2.resize(
-                img,
-                (new_width, new_height),
-                interpolation=cv2.INTER_AREA
+            print(
+                "ERROR: OpenCV could not "
+                "decode image."
             )
 
             print(
-                f"Resized image: "
-                f"{width}x{height} -> "
-                f"{new_width}x{new_height}"
+                "====================================\n"
             )
+
+            return jsonify({
+                "error": (
+                    "Could not decode "
+                    "uploaded image."
+                )
+            }), 400
+
+        # ----------------------------------------------------
+        # Resize very large images before
+        # expensive analysis
+        # ----------------------------------------------------
+
+        original_height, original_width = (
+            image.shape[:2]
+        )
 
         print(
             "Decoded image:",
             image.shape
         )
 
+        MAX_DIM = 1200
+
+        largest_dim = max(
+            original_height,
+            original_width
+        )
+
+        if largest_dim > MAX_DIM:
+
+            scale = (
+                MAX_DIM
+                / largest_dim
+            )
+
+            new_width = int(
+                original_width * scale
+            )
+
+            new_height = int(
+                original_height * scale
+            )
+
+            image = cv2.resize(
+                image,
+                (
+                    new_width,
+                    new_height
+                ),
+                interpolation=cv2.INTER_AREA
+            )
+
+            print(
+                f"Resized image: "
+                f"{original_width}x"
+                f"{original_height} -> "
+                f"{new_width}x"
+                f"{new_height}"
+            )
+
+        else:
+
+            print(
+                "Image size is within "
+                "analysis limit."
+            )
+
         # ----------------------------------------------------
         # Run PAZHAM analysis
         # ----------------------------------------------------
 
-        result = analyze_image(image)
+        result = analyze_image(
+            image
+        )
 
-        print("\n========== PAZHAM ANALYSIS ==========")
         print(
-            f"Image: {image.shape[1]} x {image.shape[0]}"
+            "\n========== PAZHAM ANALYSIS =========="
         )
-        print(
-            f"Centreline points: {len(result['centrelinePoints'])}"
-        )
-        print(
-            f"Curve length: {result['curveLength']}"
-        )
-        print(
-            f"Max curvature: {result['maxCurvature']}"
-        )
-        print(
-            f"Total turning: {result['totalTurningDegrees']}°"
-        )
-        print(
-            f"Score: {result['score']}/100"
-        )
-        print(
-            f"Equation: {result['equation']}"
-        )
-        print("====================================\n")
 
-        return jsonify(result)
+        print(
+            f"Image: "
+            f"{image.shape[1]} x "
+            f"{image.shape[0]}"
+        )
+
+        print(
+            f"Centreline points: "
+            f"{len(result['centrelinePoints'])}"
+        )
+
+        print(
+            f"Curve length: "
+            f"{result['curveLength']}"
+        )
+
+        print(
+            f"Max curvature: "
+            f"{result['maxCurvature']}"
+        )
+
+        print(
+            f"Total turning: "
+            f"{result['totalTurningDegrees']}°"
+        )
+
+        print(
+            f"Score: "
+            f"{result['score']}/100"
+        )
+
+        print(
+            f"Equation: "
+            f"{result['equation']}"
+        )
+
+        print(
+            "====================================\n"
+        )
+
+        return jsonify(
+            result
+        )
 
     except Exception as error:
 
-        print("\n========== PAZHAM ERROR ==========")
+        print(
+            "\n========== PAZHAM ERROR =========="
+        )
 
         print(
             "ERROR:",
@@ -1751,7 +2116,6 @@ def analyze():
         }), 500
 
 
-
 # ============================================================
 # HEALTH CHECK
 # ============================================================
@@ -1763,7 +2127,9 @@ def analyze():
 def home():
 
     return jsonify({
-        "status": "PAZHAM backend is running",
+        "status": (
+            "PAZHAM backend is running"
+        ),
         "version": "9.0",
         "endpoint": "/analyze"
     })
@@ -1778,27 +2144,42 @@ if __name__ == "__main__":
     print(
         "=============================================="
     )
+
     print(
         "        PAZHAM BANANA ANALYZER v9.0"
     )
+
     print(
         "=============================================="
     )
+
     print(
         "Robust contour-based centreline extraction"
     )
+
     print(
         "Direct centreline curvature calculation"
     )
+
+    print(
+        "Large-image resizing enabled"
+    )
+
     print(
         "Server: http://localhost:5001"
     )
+
     print(
         "=============================================="
     )
 
     app.run(
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5001)),
+        port=int(
+            os.environ.get(
+                "PORT",
+                5001
+            )
+        ),
         debug=False
     )
