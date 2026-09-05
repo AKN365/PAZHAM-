@@ -28,7 +28,7 @@ Our program calculates the curvature of a banana, prints its polynomial equation
 Languages: TypeScript, Python, CSS
 Frameworks: Next.js, React
 Libraries: OpenCV, NumPy, Motion
-Tools: Git, GitHub, npm, VS Code
+Tools: Git, GitHub, npm, VS Code, Vercel, Render
 
 # Implementation
 For Software:Developed a Next.js/React application using TypeScript for image upload and visualization, with Python, OpenCV and NumPy for banana detection and image processing. The system extracts the banana’s centreline, fits a polynomial curve, and calculates its equation and curvature.
@@ -53,6 +53,9 @@ git clone https://github.com/AKN365/PAZHAM-.git
 cd PAZHAM-/pazham-ui
 npm install
 npm run dev
+
+# Sample Input
+<img width="433" height="577" alt="pic" src="https://github.com/user-attachments/assets/d2fbad48-c1f8-4f89-9e95-e3f7e7b8e54c" />
 
 # Project Documentation
 Screenshots 
