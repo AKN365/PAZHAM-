@@ -1587,6 +1587,7 @@ def analyze_image(image):
 # FLASK API
 # ============================================================
 
+
 @app.route(
     "/analyze",
     methods=["POST"]
@@ -1595,23 +1596,60 @@ def analyze():
 
     try:
 
+        print("\n========== PAZHAM REQUEST ==========")
+        print("Method:", request.method)
+        print("Content-Type:", request.content_type)
+        print("Content-Length:", request.content_length)
+        print("Request files:", list(request.files.keys()))
+        print("Request form:", list(request.form.keys()))
+
+        # ----------------------------------------------------
+        # Check uploaded image
+        # ----------------------------------------------------
+
         if "image" not in request.files:
 
+            print("ERROR: No 'image' field in request.files")
+            print("====================================\n")
+
             return jsonify({
-                "error": "No image uploaded."
+                "error": "No image uploaded.",
+                "receivedFiles": list(request.files.keys()),
+                "receivedForm": list(request.form.keys()),
+                "contentType": request.content_type
             }), 400
 
-        uploaded_file = request.files[
-            "image"
-        ]
+        uploaded_file = request.files["image"]
+
+        print(
+            "Received filename:",
+            uploaded_file.filename
+        )
+
+        print(
+            "Received mimetype:",
+            uploaded_file.mimetype
+        )
 
         file_bytes = uploaded_file.read()
 
+        print(
+            "Received bytes:",
+            len(file_bytes)
+        )
+
         if not file_bytes:
+
+            print("ERROR: Uploaded image is empty.")
+            print("====================================\n")
 
             return jsonify({
                 "error": "Uploaded image is empty."
             }), 400
+
+        # ----------------------------------------------------
+        # Decode image
+        # ----------------------------------------------------
 
         image_array = np.frombuffer(
             file_bytes,
@@ -1625,23 +1663,25 @@ def analyze():
 
         if image is None:
 
+            print("ERROR: OpenCV could not decode image.")
+            print("====================================\n")
+
             return jsonify({
                 "error": "Could not decode uploaded image."
             }), 400
 
-        result = analyze_image(
-            image
+        print(
+            "Decoded image:",
+            image.shape
         )
 
-        print(
-            "\n========================================"
-        )
-        print(
-            "PAZHAM ANALYSIS"
-        )
-        print(
-            "========================================"
-        )
+        # ----------------------------------------------------
+        # Run PAZHAM analysis
+        # ----------------------------------------------------
+
+        result = analyze_image(image)
+
+        print("\n========== PAZHAM ANALYSIS ==========")
         print(
             f"Image: {image.shape[1]} x {image.shape[0]}"
         )
@@ -1663,19 +1703,16 @@ def analyze():
         print(
             f"Equation: {result['equation']}"
         )
-        print(
-            "========================================\n"
-        )
+        print("====================================\n")
 
         return jsonify(result)
 
     except Exception as error:
 
-        print(
-            "\n========== PAZHAM ERROR =========="
-        )
+        print("\n========== PAZHAM ERROR ==========")
 
         print(
+            "ERROR:",
             str(error)
         )
 
@@ -1688,6 +1725,7 @@ def analyze():
         return jsonify({
             "error": str(error)
         }), 500
+
 
 
 # ============================================================
