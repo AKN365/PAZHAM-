@@ -26,7 +26,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:5001/analyze",
+        "https://pazham-backend.onrender.com",
         {
           method: "POST",
           body: formData,
