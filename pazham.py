@@ -522,7 +522,7 @@ def extract_robust_centreline(
         max(
             80,
             min(
-                700,
+                200,
                 round(length)
             )
         )
@@ -1992,7 +1992,7 @@ def analyze():
             image.shape
         )
 
-        MAX_DIM = 1200
+        MAX_DIM = 800
 
         largest_dim = max(
             original_height,
